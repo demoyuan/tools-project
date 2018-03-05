@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     imagemin = require('gulp-imagemin'),
     tinypng_nokey = require('gulp-tinypng-nokey'),
+    del = require('del'),
     gulpSequence = require('gulp-sequence');
 
 
@@ -8,12 +9,12 @@ var path = './src/',
     dist = './dist/';
 
 var config = {
-    inputImgFile: path + 'images/',
-    outputImgFile: dist + 'images/',
-    outputMinImgFile: dist + 'images/min',
-    outputTinypngFile: dist + 'images/tinypng',
-    getImg: path + 'images/*',
-    getOutputMinImg: dist + 'images/min/*.{png,jpg,jpeg,gif,ico}'
+    inputImgFile        : path + 'images/',
+    outputImgFile       : dist + 'images/',
+    outputMinImgFile    : dist + 'images/min',
+    outputTinypngFile   : dist + 'images/tinypng',
+    getImg              : path + 'images/**/*',
+    getOutputMinImg     : dist + 'images/min/**/*.{png,jpg,jpeg,gif,ico}'
 }
 
 // version ^3.0.0
@@ -33,9 +34,12 @@ gulp.task('tp', function() {
     return gulp.src(config.getOutputMinImg)
         .pipe(tinypng_nokey ())
         .pipe(gulp.dest(config.outputTinypngFile));
-})
+});
 
+gulp.task('clean', function(){
+    return del(dist);
+});
 
 gulp.task('mini-img', function(cb){
-    gulpSequence('imagesMin', 'tp')(cb);
+    gulpSequence('clean', 'imagesMin', 'tp')(cb);
 });
