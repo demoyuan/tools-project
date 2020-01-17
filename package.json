@@ -1,18 +1,20 @@
 {
-  "name": "tools project",
-  "version": "1.0.0",
+  "name": "tools-project",
+  "version": "1.0.1",
   "description": "gulp project",
-  "main": "gulpfile.js",
+  "main": "index.js",
+  "repository": "https://github.com/demoyuan/tools-project.git",
+  "author": "Vinson Yuan",
+  "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "images": "gulp images",
+    "zip": "gulp zip"
   },
-  "author": "vinson.yuan",
-  "license": "ISC",
+  "dependencies": {
+    "gulp-image": "^6.0.0",
+    "gulp-zip": "^5.0.1"
+  },
   "devDependencies": {
-    "del": "^3.0.0",
-    "gulp": "^3.9.1",
-    "gulp-imagemin": "^4.1.0",
-    "gulp-sequence": "^1.0.0",
-    "gulp-tinypng-nokey": "^1.1.0"
+    "gulp": "^4.0.2"
   }
 }

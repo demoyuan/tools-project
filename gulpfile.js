@@ -1,45 +1,37 @@
-var gulp = require('gulp'),
-    imagemin = require('gulp-imagemin'),
-    tinypng_nokey = require('gulp-tinypng-nokey'),
-    del = require('del'),
-    gulpSequence = require('gulp-sequence');
+const { src, dest, series, parallel } = require('gulp')
+const { spawn } = require('child_process')
+const image = require('gulp-image')
+const zip = require('gulp-zip')
+const runTime = new Date().toISOString().replace(/:/g, '_')
 
-
-var path = './src/',
-    dist = './dist/';
-
-var config = {
-    inputImgFile        : path + 'images/',
-    outputImgFile       : dist + 'images/',
-    outputMinImgFile    : dist + 'images/min',
-    outputTinypngFile   : dist + 'images/tinypng',
-    getImg              : path + 'images/**/*',
-    getOutputMinImg     : dist + 'images/min/**/*.{png,jpg,jpeg,gif,ico}'
+function miniImage() {
+  return src('src/images/**/*')
+    .pipe(image({
+      pngquant: true,
+      optipng: true,
+      zopflipng: true,
+      jpegRecompress: true,
+      mozjpeg: true,
+      guetzli: true,
+      gifsicle: true,
+      svgo: true,
+      concurrent: 10,
+      quiet: false
+    }))
+    .pipe(dest(`dist/${runTime}`))
 }
 
-// version ^3.0.0
-gulp.task('imagesMin', function () {
-    return gulp.src(config.getImg)
-        .pipe(imagemin([
-                imagemin.gifsicle({interlaced: true}),  // 交错式gif
-                imagemin.jpegtran({progressive: true}), // 渐进式jpg
-                imagemin.optipng(),                     // 默认png优化级别5
-                imagemin.svgo()                         // svg
-            ], {verbose: false}
-        ))
-        .pipe(gulp.dest(config.outputMinImgFile))
-});
+function bzip() {
+  return src('dist/**/*')
+    .pipe(zip('dist.zip'))
+    .pipe(dest('dist'))
+}
 
-gulp.task('tp', function() {
-    return gulp.src(config.getOutputMinImg)
-        .pipe(tinypng_nokey ())
-        .pipe(gulp.dest(config.outputTinypngFile));
-});
+function logDir() {
+  spawn('git', ['status'], { stdio: 'inherit' })
+  return spawn('ls', ['-a', '-l'], { cwd: './dist', stdio: 'inherit' })
+}
 
-gulp.task('clean', function(){
-    return del(dist);
-});
-
-gulp.task('mini-img', function(cb){
-    gulpSequence('clean', 'imagesMin', 'tp')(cb);
-});
+exports.images = series(miniImage)
+exports.zip = series(bzip)
+exports.default = series(miniImage, bzip, logDir)
